@@ -12,3 +12,9 @@ After making changes, call the command again, otherwise the xbox will not recogn
 ## Note
 
 The project has only been tested on MacOS. Not sure if it works under Windows and Linux.
+
+## Development
+
+```sh
+sudo dotnet run list
+```
