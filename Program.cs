@@ -40,13 +40,16 @@ switch (command)
             return;
         }
 
-        SetXboxDiscMode(args[2], args[1]);
+        if (SetXboxDiscMode(args[2], args[1]))
+        {
+            Console.WriteLine($"Disc {args[2]} switched to {args[1]}");
+        }
         break;
     case "toggle":
         ToggleXboxDisc();
         break;
     default:
-        Console.WriteLine($"Invalid command {args[0]}. Use 'list', 'read', 'set' or 'toggle'");
+        Console.WriteLine($"Invalid command '{args[0]}'. Use 'list', 'read', 'set' or 'toggle'");
         break;
 }
 
@@ -87,11 +90,11 @@ static string? ReadXboxDiscMode(string path)
 }
 
 
-static void SetXboxDiscMode(string path, string mode)
+static bool SetXboxDiscMode(string path, string mode)
 {
     try
     {
-        using var fs = new FileStream(path, FileMode.Open, FileAccess.ReadWrite);
+        using var fs = new FileStream(path, FileMode.Open, FileAccess.Write);
         fs.Seek(510, SeekOrigin.Begin);
         var bytes = new byte[2];
 
@@ -111,10 +114,12 @@ static void SetXboxDiscMode(string path, string mode)
 
         fs.Write(bytes, 0, 2);
         Console.WriteLine($"Successfully set to {mode} mode");
+        return true;
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"An error occurred: {ex.Message}");
+        Console.WriteLine(ex.Message);
+        return false;
     }
 }
 
@@ -124,8 +129,10 @@ static void ToggleXboxDisc()
     if (xboxDisc == null) return;
 
     var newMode = xboxDisc.Mode == "xbox" ? "pc" : "xbox";
-    SetXboxDiscMode(xboxDisc.Path, newMode);
-    Console.WriteLine($"Disc {xboxDisc.Path} switched from {xboxDisc.Mode} to {newMode}");
+    if (SetXboxDiscMode(xboxDisc.Path, newMode))
+    {
+        Console.WriteLine($"Disc {xboxDisc.Path} switched from {xboxDisc.Mode} to {newMode}");
+    }
 }
 
 
@@ -137,7 +144,7 @@ static string RunCommand(string arguments)
         process.StartInfo.FileName = "cmd.exe";
         process.StartInfo.Arguments = "/c " + arguments;
     }
-    else // MacOS and Linux
+    else // Another systems
     {
         process.StartInfo.FileName = "bash";
         process.StartInfo.Arguments = "-c \"" + arguments + "\"";
@@ -166,19 +173,19 @@ static IEnumerable<XboxDisc> ReadXboxDiscs()
             yield return xboxDevice;
         }
     }
-    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
     {
-        var output = RunCommand("lsblk -d");
-        foreach (var xboxDevice in ProcessLinuxReadXboxDiscs(output))
+        var output = RunCommand("diskutil list");
+        foreach (var xboxDevice in ProcessMacReadXboxDiscs(output))
         {
             hasXboxDisc = true;
             yield return xboxDevice;
         }
     }
-    else // MacOS
+    else // Another systems
     {
-        var output = RunCommand("discutil list");
-        foreach (var xboxDevice in ProcessMacReadXboxDiscs(output))
+        var output = RunCommand("lsblk -d");
+        foreach (var xboxDevice in ProcessLinuxReadXboxDiscs(output))
         {
             hasXboxDisc = true;
             yield return xboxDevice;

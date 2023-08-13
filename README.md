@@ -7,7 +7,7 @@ Project to make xbox disc available on pc.
 Mount xbox disc and execute command:
 `sudo ./Xbox.DriverConvertor toggle`
 
-After making changes, call the command again, otherwise the xbox will not recognize the disk.
+After making changes, dismount disc and call the command again, otherwise the xbox will not recognize the disc.
 
 ## Note
 
