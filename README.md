@@ -1,13 +1,13 @@
 # Xbox DriverConvertor
 
-Project to make xbox disc available on pc.
+Project to make xbox disk available on pc.
 
 ## How use?
 
-Mount xbox disc and execute command:
+Mount xbox disk and execute command:
 `sudo ./Xbox.DriverConvertor toggle`
 
-After making changes, dismount disc and call the command again, otherwise the xbox will not recognize the disc.
+After making changes, dismount disk and call the command again, otherwise the xbox will not recognize the disk.
 
 ## Note
 
